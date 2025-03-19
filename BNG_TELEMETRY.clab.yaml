@@ -1,0 +1,54 @@
+name: kimer-BNG_Telemetry
+
+topology:
+  nodes:
+    agg:
+      kind: nokia_sros
+      image: registry.srlinux.dev/pub/vr-sros:24.7.R1
+      type: sr-1
+      license: license.txt
+      startup-config: agg.txt
+    bng1:
+      kind: nokia_sros
+      image: registry.srlinux.dev/pub/vr-sros:24.7.R1
+      type: sr-1s
+      license: license.txt
+      startup-config: bng1.txt      
+    bng2:
+      kind: nokia_sros
+      image: registry.srlinux.dev/pub/vr-sros:24.7.R1
+      type: sr-1s
+      license: license.txt
+      startup-config: bng2.txt
+    core:
+      kind: nokia_sros
+      image: registry.srlinux.dev/pub/vr-sros:24.7.R1
+      type: sr-1s
+      license: license.txt
+      startup-config: core.txt
+    radius:
+      kind: linux
+      image: harbor.nice.nokia.net/docker/freeradius/freeradius-server:3.2.3
+      cmd: -X
+      mgmt-ipv4: 172.20.20.111
+      binds:
+        - raddb/clients.conf:/etc/raddb/clients.conf
+        - raddb/mods-config/files/authorize:/etc/raddb/mods-config/files/authorize
+        - ./logs:/var/log/radius
+    bngblaster:
+      kind: linux
+      image: azyablov/bng-blaster:latest
+      binds:
+        - bngblaster/pppoe.json:/pppoe.json
+
+
+  links:
+    - endpoints: ["bngblaster:eth1", "agg:1/1/1"]
+    - endpoints: ["bng1:1/1/1", "agg:1/1/2"]
+    - endpoints: ["bng2:1/1/1", "agg:1/1/3"]
+    - endpoints: ["bng1:1/1/2", "core:1/1/1"]
+    - endpoints: ["bng2:1/1/2", "core:1/1/2"]
+    - endpoints: ["bng1:1/1/3", "bng2:1/1/3"]
+    - endpoints: ["bngblaster:eth2", "core:1/1/3"]
+    - endpoints: ["radius:eth1", "core:1/1/4"]
+
