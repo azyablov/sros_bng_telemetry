@@ -508,12 +508,6 @@ configure {
                         use-pool-from-client {
                         }
                     }
-                    failover {
-                        admin-state enable
-                        peer 10.0.0.2 {
-                            sync-tag "DHCPv6"
-                        }
-                    }
                     pool "V6Pool" {
                         delegated-prefix {
                             minimum 56
